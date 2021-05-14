@@ -1,4 +1,4 @@
-console.log("yes")
+console.log("stonkBot init.");
 
 const Discord = require('discord.js');
 
@@ -12,15 +12,22 @@ bot.on('message', (message)=> {
 })
 keepAlive()
 
-
-
-
-
-
-
-
-
-
+class Stock {
+    name;
+}
+class nuts extends Stock {
+    nuts() {
+        this.name = "nuts";
+    }
+}
+class Shallot extends Stock {
+    Shallot() {
+        this.name = "Shallot";
+    }
+}
+static class StockRecord {
+    static record = [];
+}
 
 
 
