@@ -1,4 +1,4 @@
-console.log("stonkBot init.");
+console.log("Init message (passed syntax).");
 
 const Discord = require('discord.js');
 
@@ -7,11 +7,10 @@ const jsonfile = require("jsonfile")
 const bot = new Discord.Client();
 const { int } = require('random');
 const keepAlive = require('./server');
-bot.on('message', (message)=> {
-  
-})
-keepAlive()
 
+var publicStats = {}
+
+/*
 class Stock {
     name;
 }
@@ -25,9 +24,21 @@ class Shallot extends Stock {
         this.name = "Shallot";
     }
 }
-static class StockRecord {
+class StockRecord {
     static record = [];
 }
+*/
+bot.on('message', (message)=> {
+  if (message.author.id === bot.user.id) {
+    return
+  }
+
+  message.channel.send(`Hey ${message.author.username}, kill yourself!`)
+})
+bot.on("ready", (ready)=>{
+  console.log("Second check message (passed ready)")
+})
+keepAlive()
 
 
 
@@ -49,4 +60,6 @@ static class StockRecord {
 
 
 
-bot.login('ODM0MzY5NDk1NTA1NDM2Njcy.YH_5JQ.Lmy-E-yOHayYVqB2bRPQI7Sdrbo')
+
+
+bot.login(process.env.sucknutsyournotseeingthetokenhaha)
