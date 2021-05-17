@@ -1,0 +1,15 @@
+{
+  "name": "stonk-bot",
+  "version": "0.0.0",
+  "description": "StonkBot",
+  "main": "app.js",
+  "author": {
+    "name": ""
+  },
+  "dependencies": {
+    "discord.js": "^12.5.3",
+    "express": "^4.17.1",
+    "jsonfile": "^6.1.0",
+    "random": "^3.0.6"
+  }
+}

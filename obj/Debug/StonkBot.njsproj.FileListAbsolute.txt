@@ -1,0 +1,3 @@
+C:\Users\Administrator\Documents\GitHub\stonkBot\obj\Debug\StonkBot.njsprojAssemblyReference.cache
+C:\Users\Administrator\Documents\GitHub\stonkBot\obj\Debug\StonkBot.njsproj.CoreCompileInputs.cache
+C:\Users\Administrator\Documents\GitHub\stonkBot\bin\Microsoft.NodejsTools.WebRole.dll
