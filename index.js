@@ -52,13 +52,14 @@ bot.on('message', (message)=> {
     serverStats = jsonfile.readFileSync("serverStats.json")
   }
   if (fs.existsSync("listOfMembers.json")) {
-    serverStats = jsonfile.readFileSync("listOfMembers.json")
+    listOfMembers = jsonfile.readFileSync("listOfMembers.json")
   }
   if (message.author.id === bot.user.id) {
     return
   }
   if (message.author.id in memberstats === false) {
     listOfMembers.push(message.author.id)
+    
     memberstats[message.author.id] = {
       balance: 5000,
       stocksOwned: [0,0],
@@ -270,8 +271,18 @@ bot.on('message', (message)=> {
         {name: "Stock Prices: ", value: `**Nuts Price: **$${serverStats.nutsprice}\n*Shallot Price: **$${serverStats.shallotprice}`},
         {name: "Shares Outstanding: ", value: `**Nuts Shares: **${serverStats.nutsOutstanding}\n**Shallot Shares: **${serverStats.shallotOutstanding}`},
         {name: "Stocks Pending Release: ", value: `**Nuts: **${serverStats.nutsPendingRelease}\n**Shallot: **${serverStats.shallotPendingRelease}`},
-        {name: "Your stocks pending release: ", value: `**Nuts: **${userStats.stockSellTime.nuts}\n**Shallot: **${userStats.stockSellTime.shallot}`}
+        
       )
+    if (userStats.stockSellTime.nuts === 0) {
+      shopEmbed.addField("Your nuts sell time: ", "NONE CURRENTLY PENDING")
+    } else {
+      shopEmbed.addField("Your nuts sell time: ", `${Math.round((userStats.stockSellTime.nuts-Date.now())/1000)} seconds`)
+    }
+    if (userStats.stockSellTime.shallot === 0) {
+      shopEmbed.addField("Your shallot sell time: ", "NONE CURRENTLY PENDING")
+    } else {
+      shopEmbed.addField("Your shallot sell time: ", `${Math.round((userStats.stockSellTime.shallot-Date.now())/1000)} seconds`)
+    }
     message.channel.send(shopEmbed)
   }
   if (parts[1] === "sell") {
@@ -290,11 +301,12 @@ bot.on('message', (message)=> {
               message.channel.send("You literally don't have any of these.")
               
             } else {
-              userStats.stockSellTime.nuts = Date.now() + Math.random()*60000
+              userStats.stockSellTime.nuts = Date.now() + (Math.random()+1)*600000
               message.channel.send(`Successfully sent 1x nuts into the market at $${serverStats.nutsprice}. Wait ${Math.round((userStats.stockSellTime.nuts - Date.now())/60000)} minutes for transaction to be complete.`)
               userStats.stockPendingSell.nuts += 1 
               userStats.stocksOwned[0] -= 1
               userStats.currentSellPrice[0] = serverStats.nutsprice
+              serverStats.nutsPendingRelease += 1
             }
           } else {
             if (userStats.stocksOwned[0] < parseInt(parts[3])) {
@@ -302,13 +314,17 @@ bot.on('message', (message)=> {
 
             } else {
               
-              userStats.stockSellTime.nuts = Date.now() + Math.random()*60000
+              userStats.stockSellTime.nuts = Date.now() + (Math.random()+1)*600000
               const sellEmbed = new Discord.MessageEmbed()
                 .setTitle("Successful transaction: inv => pending :white_check_mark:")
                 .setDescription(`You have successfully moved ${parseInt(parts[3])}x nuts into pending sell. Wait ${Math.round((userStats.stockSellTime.nuts - Date.now())/60000)} minutes for transaction to be complete.`)
-                userStats.stockPendingSell.nuts += parseInt(parts[3]) 
-                userStats.stocksOwned[0] -= parseInt(parts[3])
-                userStats.currentSellPrice[0] = serverStats.nutsprice
+
+                
+              serverStats.nutsPendingRelease += parseInt(parts[3]) 
+              userStats.stocksOwned[0] -= parseInt(parts[3])
+              userStats.currentSellPrice[0] = serverStats.nutsprice
+              userStats.stockPendingSell += parseInt(parts[3])
+              
               message.channel.send(sellEmbed)
 
             }
@@ -326,11 +342,12 @@ bot.on('message', (message)=> {
               message.channel.send("You literally don't have any of these.")
               
             } else {
-              userStats.stockSellTime.shallot = Date.now() + Math.random()*60000
+              userStats.stockSellTime.shallot = Date.now() + (Math.random()+1)*600000
               message.channel.send(`Successfully sent 1x shallot into the market at $${serverStats.shallotprice}. Wait ${Math.round((userStats.stockSellTime.shallot - Date.now())/60000)} minutes for transaction to be complete.`)
               userStats.stockPendingSell.shallot += 1 
               userStats.stocksOwned[1] -= 1
               userStats.currentSellPrice[1] = serverStats.shallotprice
+              serverStats.shallotPendingRelease += 1
             }
           } else {
             if (userStats.stocksOwned[1] < parseInt(parts[3])) {
@@ -338,13 +355,15 @@ bot.on('message', (message)=> {
 
             } else {
               
-              userStats.stockSellTime.shallot = Date.now() + Math.random()*60000
+              userStats.stockSellTime.shallot = Date.now() + (Math.random()+1)*600000
               const sellEmbed = new Discord.MessageEmbed()
                 .setTitle("Successful transaction: inv => pending :white_check_mark:")
                 .setDescription(`You have successfully moved ${parseInt(parts[3])}x nuts into pending sell. Wait ${Math.round((userStats.stockSellTime.shallot - Date.now())/60000)} minutes for transaction to be complete.`)
-                userStats.stockPendingSell.shallot += parseInt(parts[3]) 
-                userStats.stocksOwned[1] -= parseInt(parts[3])
-                userStats.currentSellPrice[1] = serverStats.shallotprice
+                
+              userStats.stockPendingSell.shallot += parseInt(parts[3]) 
+              userStats.stocksOwned[1] -= parseInt(parts[3])
+              userStats.currentSellPrice[1] = serverStats.shallotprice
+              serverStats.shallotPendingRelease += parseInt(parts[3])
               message.channel.send(sellEmbed)
 
             }
@@ -353,7 +372,8 @@ bot.on('message', (message)=> {
       }
     }
   }
-  if (message.author.id in listOfMembers === false) {
+  if (listOfMembers.indexOf(message.author.id) === -1) {
+    listOfMembers.push(message.author.id)
     message.channel.send(listOfMembers)
     
   }
@@ -361,27 +381,35 @@ bot.on('message', (message)=> {
   jsonfile.writeFileSync("memberStats.json", memberstats)
   jsonfile.writeFileSync("serverStats.json", serverStats)
   jsonfile.writeFileSync("listOfMembers.json", listOfMembers)
-
+ 
 })
 bot.on("ready", (ready)=>{
   console.log("Second check message (passed ready)")
   checkStockDone = setInterval(() => {
-    for (var x = 0; x < listOfMembers.length; x++) {
-      message.channel.send("ready")
-      if (Date.now() >= memberstats[listOfMembers[x]].stockSellTime) {
-        memberstats[listOfMembers].balance += memberstats[listOfMembers[x]].stockPendingSell.shallot * memberstats[listOfMembers[x]].currentSellPrice[1]
-        memberstats[listOfMembers].balance += memberstats[listOfMembers[x]].stockPendingSell.nuts * memberstats[listOfMembers[x]].currentSellPrice[0]
-        memberstats[listOfMembers].stockPendingSell = {
-          shallot: 0,
-          nuts: 0
-        }
+    for (var x = 1; x < listOfMembers.length; x++) {
+      
+      
+      if (Date.now() >= memberstats[listOfMembers[x]].stockSellTime.shallot) {
+        memberstats[listOfMembers[x]].balance += memberstats[listOfMembers[x]].stockPendingSell.shallot * memberstats[listOfMembers[x]].currentSellPrice[1]
+        serverStats.shallotOutstanding += memberstats[listOfMembers[x]].stockPendingSell.shallot
+        memberstats[listOfMembers[x]].stockPendingSell.shallot  = 0
+        memberstats[listOfMembers[x]].stockSellTime.shallot = 0
+        console.log("done")
         
-        memberstats[listOfMembers].stockSellTime = {
-          shallot: 0,
-          nuts: 0
-        }
+        
 
       }
+      if (Date.now() >= memberstats[listOfMembers[x]].stockSellTime.nuts) {
+        memberstats[listOfMembers[x]].balance += memberstats[listOfMembers[x]].stockPendingSell.nuts * memberstats[listOfMembers[x]].currentSellPrice[0]
+        serverStats.nutsOutstanding += memberstats[listOfMembers[x]].stockPendingSell.nuts
+        memberstats[listOfMembers[x]].stockPendingSell.nuts = 0
+        memberstats[listOfMembers[x]].stockSellTime.nuts = 0
+        console.log("done")
+        
+        
+      }
+      jsonfile.writeFileSync("memberStats.json", memberstats)
+      jsonfile.writeFileSync("serverStats.json", serverStats)
     }
     
   }, 5000)
