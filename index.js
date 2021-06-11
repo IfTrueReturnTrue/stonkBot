@@ -122,8 +122,12 @@ bot.on('message', (message) => {
                         message.channel.send(helpSpec);
                     } else i++;
                 }
-                if (foo === cmds.length)
+                if (foo === cmds.length) {
                     message.channel.send("The command '" + parts[2] + "' doesn't exist!");
+                }
+                if (foo = 5) {
+                    message.channel.send("Lol this is cool");
+                }
             }
         }
         if (parts[1] === "buy") {
