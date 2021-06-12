@@ -125,7 +125,7 @@ bot.on('message', (message) => {
                 if (foo === cmds.length) {
                     message.channel.send("The command '" + parts[2] + "' doesn't exist!");
                 }
-                if (foo = 5) {
+                if (foo === 5) {
                     message.channel.send("Lol this is cool");
                 }
             }
